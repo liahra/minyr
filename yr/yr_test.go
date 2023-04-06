@@ -52,9 +52,7 @@ func TestCelsiusToFahrenheitLine(t *testing.T) {
 		{input: "Kjevik;SN39040;18.03.2022 01:50;6", want: "Kjevik;SN39040;18.03.2022 01:50;42.8"},
 		{input: "Kjevik;SN39040;07.03.2023 18:20;0", want: "Kjevik;SN39040;07.03.2023 18:20;32.0"},
 		{input: "Kjevik;SN39040;08.03.2023 02:20;-11", want: "Kjevik;SN39040;08.03.2023 02:20;12.2"},
-		{input: "Data er gyldig per 18.03.2023 (CC BY 4.0), Meteorologisk institutt (MET);;;", want: "Data er basert på gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av STUDENTENS_NAVN"},
-		//{input: "Kjevik;SN39040;18.03.2022 01:50", want: ""},
-
+		{input: "Data er gyldig per 18.03.2023 (CC BY 4.0), Meteorologisk institutt (MET);;;", want: "Data er basert på gyldig data (per 18.03.2023) (CC BY 4.0) fra Meteorologisk institutt (MET);endringen er gjort av C. Nilsen"},
 	}
 
 	for _, tc := range tests {
@@ -77,7 +75,7 @@ func TestAverage(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		got, _ := CalculateAverage(tc.input1, tc.input2)
+		got, _ := CalculateAverageFahr(tc.input1, tc.input2)
 		if !(tc.want == got) {
 			t.Errorf("expected %v, got: %v", tc.want, got)
 		}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,93 +9,124 @@ import (
 	"github.com/liahra/minyr/yr"
 )
 
-// Flag variables
-var convert string
-var average string
-
-func init() {
-	// Flags
-	flag.StringVar(&convert, "convert", "j", "Convert to Fahrenheit and create new file")
-	flag.StringVar(&average, "average", "c", "Get average temperature in (c)elsius or (f)ahrenheit")
-
-}
-
 func main() {
-	// Parse flags
-	flag.Parse()
+	var input string
+	scanner := bufio.NewScanner(os.Stdin)
+	fmt.Println("Velg ett av følgende alternativer:")
+	fmt.Println("'convert' for å gjennomføre en konvertering")
+	fmt.Println("'average' for å finne gjennomsnittstemperaturen")
+	fmt.Println("'q' for å avslutte programmet")
 
-	// File to read from
-	file, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	// Check if file exist
-	_, statErr := os.Stat("kjevik-temp-fahr-20220318-20230318.csv")
-
-	outFileExists := !os.IsNotExist(statErr)
-
-	// Convert, not overwrite
-	if outFileExists && convert == "n" && isFlagPassed("convert") {
-		log.Println("File already exists, no action taken")
-		return
-	}
-
-	//  Convert and overwrite, or convert if file does not exist
-	if (convert == "j" && isFlagPassed("convert")) || (convert == "n" && isFlagPassed("convert") && !outFileExists) {
-		// File to read to
-		outFile, err := os.OpenFile("kjevik-temp-fahr-20220318-20230318.csv", os.O_RDWR|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		defer outFile.Close()
-
-		// Writer to write to file
-		writer := bufio.NewWriter(outFile)
-
-		// Scanner to read file
-		scanner := bufio.NewScanner(file)
-
-		for scanner.Scan() {
-			// Reading lines one by one
-			input := scanner.Text()
-
-			// Using function from yr
-			output, err := yr.CelsiusToFahrenheitLine(input)
+	for scanner.Scan() {
+		input = scanner.Text()
+		if input == "q" || input == "exit" {
+			fmt.Println("exit")
+			os.Exit(0)
+		} else if input == "convert" {
+			file, err := os.Open("kjevik-temp-celsius-20220318-20230318.csv")
 			if err != nil {
-				log.Println(err)
-			} else {
-				fmt.Fprintln(writer, output)
-				writer.Flush()
+				log.Fatal(err)
 			}
-		}
-		if err := scanner.Err(); err != nil {
-			fmt.Println(err)
-			return
+			defer file.Close()
+
+			_, err = os.Stat("kjevik-temp-fahr-20220318-20230318.csv")
+			if err != nil {
+				// Filen finnes ikke, gjennomfører konvertering
+				outFile, err := os.OpenFile("kjevik-temp-fahr-20220318-20230318.csv", os.O_RDWR|os.O_CREATE, 0666)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				defer outFile.Close()
+
+				writer := bufio.NewWriter(outFile)
+				scanner := bufio.NewScanner(file)
+
+				for scanner.Scan() {
+					input := scanner.Text()
+					output, err := yr.CelsiusToFahrenheitLine(input)
+					if err != nil {
+						log.Println(err)
+					} else {
+						fmt.Fprintln(writer, output)
+						writer.Flush()
+					}
+				}
+
+				if err := scanner.Err(); err != nil {
+					log.Println(err)
+					return
+				}
+
+				fmt.Println("Konvertering utført!")
+				break
+			} else {
+				fmt.Print("Filen eksisterer allerede. Vil du generere filen på nytt? (j/n): ")
+				scanner.Scan()
+				input := scanner.Text()
+
+				if input == "j" {
+					outFile, err := os.OpenFile("kjevik-temp-fahr-20220318-20230318.csv", os.O_RDWR|os.O_CREATE, 0666)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					defer outFile.Close()
+	
+					writer := bufio.NewWriter(outFile)
+					scanner := bufio.NewScanner(file)
+	
+					for scanner.Scan() {
+						input := scanner.Text()
+						output, err := yr.CelsiusToFahrenheitLine(input)
+						if err != nil {
+							log.Println(err)
+						} else {
+							fmt.Fprintln(writer, output)
+							writer.Flush()
+						}
+					}
+					if err := scanner.Err(); err != nil {
+						log.Println(err)
+						return
+					}
+
+					fmt.Println("Konvertering utført!")
+					break
+				} else if input == "n" {
+					fmt.Println("Konvertering avbrutt.")
+					break
+				} else {
+					fmt.Println("Venligst velg (j)a eller (n)ei:")
+				}
+			}
+		} else if input == "average" {
+			fmt.Print("Ønsker du gjennomsnittet i grader Celsius eller grader Fahrenheit? (c/f): ")
+			
+			var averageF string
+			
+			scanner.Scan()
+			input = scanner.Text()
+
+			if input == "c" {
+				av, err := yr.CalculateAverageCels("kjevik-temp-celsius-20220318-20230318.csv")
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Printf("Gjennomsnitt i grader Celsius: %v\n", av)
+				}
+			} else if input == "f" {
+					av, err := yr.CalculateAverageFahr("kjevik-temp-celsius-20220318-20230318.csv", averageF)
+					if err != nil {
+						fmt.Println(err)
+					} else {
+						fmt.Printf("Gjennomsnitt i grader Fahrenheit: %v\n", av)
+					}
+				} else {
+					fmt.Println("Ugyldig valg")
+				}
+			} else {
+			fmt.Println("Venligst velg convert, average eller exit:")
 		}
 	}
-
-	// Avarage
-	if isFlagPassed("average") {
-		av, err := yr.CalculateAverage("kjevik-temp-celsius-20220318-20230318.csv", average)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(av)
-		}
-	}
-}
-
-// Checking if flagg is specified
-func isFlagPassed(name string) bool {
-	found := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == name {
-			found = true
-		}
-	})
-	return found
 }
