@@ -15,7 +15,8 @@ func main() {
 	fmt.Println("Velg ett av følgende alternativer:")
 	fmt.Println("'convert' for å gjennomføre en konvertering")
 	fmt.Println("'average' for å finne gjennomsnittstemperaturen")
-	fmt.Println("'q' for å avslutte programmet")
+	fmt.Println("'exit' for å avslutte programmet")
+	fmt.Print("> " )
 
 	for scanner.Scan() {
 		input = scanner.Text()
@@ -59,9 +60,12 @@ func main() {
 				}
 
 				fmt.Println("Konvertering utført!")
-				break
+				fmt.Print("> " )
+				continue
 			} else {
-				fmt.Print("Filen eksisterer allerede. Vil du generere filen på nytt? (j/n): ")
+				fmt.Println("Filen eksisterer allerede. Vil du generere filen på nytt? (j/n)")
+				fmt.Print("> " )
+
 				scanner.Scan()
 				input := scanner.Text()
 
@@ -92,17 +96,21 @@ func main() {
 					}
 
 					fmt.Println("Konvertering utført!")
-					break
+					fmt.Print("> " )
+					continue
 				} else if input == "n" {
 					fmt.Println("Konvertering avbrutt.")
-					break
+					fmt.Print("> " )
+					continue
 				} else {
 					fmt.Println("Venligst velg (j)a eller (n)ei:")
+					fmt.Print("> " )
 				}
 			}
 		} else if input == "average" {
-			fmt.Print("Ønsker du gjennomsnittet i grader Celsius eller grader Fahrenheit? (c/f): ")
-			
+			fmt.Println("Ønsker du gjennomsnittet i grader Celsius eller grader Fahrenheit? (c/f)")
+			fmt.Print("> " )
+
 			var averageF string
 			
 			scanner.Scan()
@@ -114,6 +122,7 @@ func main() {
 					fmt.Println(err)
 				} else {
 					fmt.Printf("Gjennomsnitt i grader Celsius: %v\n", av)
+					fmt.Print("> " )
 				}
 			} else if input == "f" {
 					av, err := yr.CalculateAverageFahr("kjevik-temp-celsius-20220318-20230318.csv", averageF)
@@ -121,12 +130,15 @@ func main() {
 						fmt.Println(err)
 					} else {
 						fmt.Printf("Gjennomsnitt i grader Fahrenheit: %v\n", av)
+						fmt.Print("> " )
 					}
 				} else {
 					fmt.Println("Ugyldig valg")
+					fmt.Print("> " )
 				}
 			} else {
 			fmt.Println("Venligst velg convert, average eller exit:")
+			fmt.Print("> " )
 		}
 	}
 }
